@@ -1,0 +1,73 @@
+---
+title: "The Flow of Surface Water:Diving into the Data"
+subtitle: "Examining the Percentage of the Popualtion using Surface Water"
+author: "Sarah Hoare"
+date: "2024-04-03"
+format: html
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+
+#libraries
+library(tidyverse)
+library(plotly)
+
+#data
+unicef_indicator_1 <- read_csv("unicef_indicator_1.csv")
+unicef_metadata <- read_csv("unicef_metadata.csv")
+data_right_3 <- read_csv("data_right_3.csv")
+
+#transformations
+data_join <- full_join(unicef_indicator_1, data_right_3)
+data_join <- full_join(unicef_metadata, unicef_indicator_1, by = join_by(country , year))
+
+data_join <- unicef_indicator_1 %>%
+full_join(data_right_3) %>%
+full_join(unicef_metadata)
+
+```
+
+
+```{r}
+#| fig-cap: "The two World Maps above (2022) and below (2010) show the proportion of the population using surface water in each country in the years 2010 and 2022. These visualisation makes it easy to see how the number of people using surface water has declined over the last 12 years.The darker the shade of green, the higher the proportion of the population that use surface water. On the other hand, the lighter the shade of orange, the lower the proportion of the population that use surface water. It clear that the populations of Europe, North America and Oceania use very little surface water. Whereas people in Africa and Asia use more surface water."
+
+
+map_world <- map_data("world")
+
+#map 2022
+
+data_join %>% 
+  filter(year == 2022) %>%
+  full_join(map_world, by = c("country" = "region")) %>%
+ggplot(aes(x = long, y = lat, group = group, fill = obs_value)) +
+  geom_polygon() +
+  scale_fill_gradient(low = "orange", high = "green") +
+  labs(title = "Percentage of the Population using Surface Water in each country in 2022",
+  fill = "%") +
+  theme(
+    text = element_text(family = "Arial")  
+  )
+```
+
+
+```{r}
+#map 2010 
+
+data_join %>%
+  filter(year == 2010)%>%
+full_join(map_world, by = c("country" = "region"))
+ggplot(aes(x = long, y = lat, group = group, fill = obs_value)) +
+  geom_polygon()+
+  scale_fill_gradient(low = "orange", high = "green") +
+  labs(title = "Percentage of the Population using Surface Water in each country in 2022",
+       fill = "%") +
+  theme(
+    text = element_text(family = "Arial")
+  )
+
+```
+
+
